@@ -1,0 +1,785 @@
+package com.example.musicplayer;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.os.Bundle;
+import android.provider.MediaStore;
+import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import java.io.File;
+import java.util.ArrayList;
+
+public class MainActivityextends AppCompatActivity {
+
+RecyclerViewrecyclerview;
+TextViewnoMusicTextview;
+ArrayList<AudioModel>SongList= new ArrayList<>();
+
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+recyclerview= findViewById(R.id.recycler_view);
+noMusicTextview= findViewById(R.id.no_songs_text);
+
+        if (CheckPermission() == false){
+requestPermission();
+            return;
+}
+
+        String[] projection = {
+MediaStore.Audio.Media.TITLE,
+MediaStore.Audio.Media.DATA,
+MediaStore.Audio.Media.DURATION,
+};
+
+String selection = MediaStore.Audio.Media.IS_MUSIC+ " !=0";
+
+
+Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,projection, selection,null,null);
+        while(cursor.moveToNext()){
+AudioModelSongData = new AudioModel(cursor.getString(1), cursor.getString(0), cursor.getString(2));
+            if(new File(SongData.getPath()).exists()){
+
+            }
+SongList.add(SongData);
+}
+if(SongList.size()==0){
+noMusicTextview.setVisibility(View.VISIBLE);
+}else {
+//recyclerview
+recyclerview.setLayoutManager(new LinearLayoutManager(this));
+
+recyclerview.setAdapter(new MusicListAdapter(SongList,getApplicationContext()));
+
+}
+    }
+booleanCheckPermission(){
+int Result = ContextCompat.checkSelfPermission(MainActivity.this,Manifest.permission.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION);
+        if(Result == PackageManager.PERMISSION_GRANTED){
+return true;
+}else {
+return false;
+}
+    }
+void requestPermission(){
+if(ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,Manifest.permission.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION)){
+Toast.makeText(MainActivity.this, "READ PERMISSION IS REQUIRED, PLEASE ALLOW FROM SETTING", Toast.LENGTH_SHORT).show();
+}else
+ActivityCompat.requestPermissions(MainActivity.this,newString[]{Manifest.permission.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION},123);
+
+}
+}
+
+
+
+
+
+activity_main.xmls
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayoutxmlns:android="http://schemas.android.com/apk/res/android"
+
+xmlns:app="http://schemas.android.com/apk/res-auto"
+
+xmlns:tools="http://schemas.android.com/tools"
+
+android:layout_width="match_parent"
+
+android:layout_height="match_parent"
+
+tools:context=".MainActivity">
+
+
+
+<TextView
+
+android:id="@+id/songs_text"
+
+android:layout_width="wrap_content"
+
+android:layout_height="wrap_content"
+
+android:layout_centerHorizontal="true"
+
+android:padding="10dp"
+
+android:text="songs"
+
+android:textsize="20dp"
+
+android:textstyle="bold" />
+
+
+
+<TextView
+
+android:layout_width="wrap_content"
+
+android:layout_height="wrap_content"
+
+android:id="@+id/no_songs_text"
+
+android:text="no song found"
+
+android:layout_centerInParent="true"
+
+android:visibility="gone"/>
+
+
+
+
+
+<androidx.recyclerview.widget.RecyclerView
+
+android:id="@+id/recycler_view"
+
+android:layout_width="match_parent"
+
+android:layout_height="wrap_content"
+
+android:layout_below="@+id/songs_text"
+
+android:layout_marginTop="1dp" />
+
+
+
+</RelativeLayout>
+
+Activity_main.xmls2
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayoutxmlns:android="http://schemas.android.com/apk/res/android"
+
+xmlns:app="http://schemas.android.com/apk/res-auto"
+
+xmlns:tools="http://schemas.android.com/tools"
+
+android:layout_width="match_parent"
+
+android:layout_height="match_parent"
+
+android:background="#A88A8A"
+
+tools:context=".MusicPlayerActivity">
+
+
+
+<TextView
+
+android:layout_width="match_parent"
+
+android:layout_height="wrap_content"
+
+android:id="@+id/song_title"
+
+android:text="Title of the song"
+
+android:singleLine="true"
+
+android:ellipsize="marquee"
+
+android:textColor="@color/white"
+
+android:textSize="20dp"
+
+android:layout_margin="20dp"
+
+android:padding="20dp" />
+
+
+
+<ImageView
+
+android:id="@+id/music_icon"
+
+android:layout_width="240dp"
+
+android:layout_height="240dp"
+
+android:layout_above="@+id/control"
+
+android:layout_centerHorizontal="true"
+
+android:layout_marginBottom="19dp"
+
+android:padding="20dp"
+
+android:src="@drawable/music_icon" />
+
+
+
+<RelativeLayout
+
+android:id="@+id/control"
+
+android:layout_width="match_parent"
+
+android:layout_height="wrap_content"
+
+android:layout_alignParentStart="true"
+
+android:layout_alignParentBottom="true"
+
+android:layout_marginStart="4dp"
+
+android:layout_marginBottom="114dp"
+
+android:padding="40dp">
+
+
+
+<SeekBar
+
+android:id="@+id/seek_bar"
+
+android:layout_width="match_parent"
+
+android:layout_height="wrap_content"
+
+android:layout_margin="0dp"
+
+android:backgroundTint="@color/white" />
+
+
+
+<TextView
+
+android:id="@+id/current_time"
+
+android:layout_width="wrap_content"
+
+android:layout_height="wrap_content"
+
+android:layout_below="@+id/seek_bar"
+
+android:layout_alignParentStart="true"
+
+android:layout_margin="20dp"
+
+android:text="0:00"
+
+android:textColor="@color/white" />
+
+
+
+<TextView
+
+android:id="@+id/total_time"
+
+android:layout_width="wrap_content"
+
+android:layout_height="wrap_content"
+
+android:layout_below="@+id/seek_bar"
+
+android:layout_alignParentEnd="true"
+
+android:layout_margin="20dp"
+
+android:text="0:00"
+
+android:textColor="@color/white" />
+
+
+
+</RelativeLayout>
+
+
+
+<RelativeLayout
+
+android:layout_width="match_parent"
+
+android:layout_height="wrap_content"
+
+android:layout_below="@+id/total_time"
+
+android:layout_alignParentStart="true"
+
+android:layout_alignParentTop="true"
+
+android:layout_alignParentBottom="true"
+
+android:layout_marginStart="10dp"
+
+android:layout_marginTop="621dp"
+
+android:layout_marginBottom="6dp"
+
+android:padding="20dp"
+
+tools:ignore="NotSibling">
+
+
+
+<ImageView
+
+android:id="@+id/previous"
+
+android:layout_width="wrap_content"
+
+android:layout_height="wrap_content"
+
+android:layout_alignParentStart="true"
+
+android:layout_centerVertical="true"
+
+android:src="@drawable/baseline_skip_previous_24" />
+
+
+
+<ImageView
+
+android:id="@+id/next"
+
+android:layout_width="wrap_content"
+
+android:layout_height="wrap_content"
+
+android:layout_alignParentEnd="true"
+
+android:layout_centerVertical="true"
+
+android:src="@drawable/baseline_skip_next_24" />
+
+
+
+<ImageView
+
+android:id="@+id/pause_play"
+
+android:layout_width="wrap_content"
+
+android:layout_height="wrap_content"
+
+android:layout_centerInParent="true"
+
+android:layout_centerVertical="true"
+
+android:src="@drawable/baseline_pause_circle_outline_24" />
+
+
+
+</RelativeLayout>
+
+
+
+
+
+</RelativeLayout>
+
+AudioModel.java
+package com.example.musicplayer;
+
+
+
+import java.io.Serializable;
+
+
+
+public class AudioModelimplements Serializable {
+
+String path;
+
+String Title;
+
+String duration;
+
+
+
+public String getPath() {
+
+return path;
+
+}
+
+
+
+public void setPath(String path) {
+
+this.path= path;
+
+}
+
+
+
+public String getTitle() {
+
+return Title;
+
+}
+
+
+
+public void setTitle(String title) {
+
+Title = title;
+
+}
+
+
+
+public String getDuration() {
+
+return duration;
+
+}
+
+
+
+public void setDuration(String duration) {
+
+this.duration= duration;
+
+}
+
+
+
+public AudioModel(String path, String title, String duration) {
+
+this.path= path;
+
+Title = title;
+
+this.duration= duration;
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+recycler_item.xmls
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayoutxmlns:android="http://schemas.android.com/apk/res/android"
+
+android:layout_width="match_parent"
+
+android:layout_height="wrap_content"
+
+android:background="#EFEFEF"
+
+android:layout_marginTop="5dp"
+
+android:layout_marginLeft="5dp"
+
+android:layout_marginRight="5dp"
+
+android:paddingTop="10dp"
+
+android:paddingBottom="10dp"
+
+xmlns:tools="http://schemas.android.com/tools">
+
+
+
+
+
+<ImageView
+
+android:layout_width="36dp"
+
+android:layout_height="36dp"
+
+android:layout_centerVertical="true"
+
+android:id="@+id/icon_view"
+
+android:src="@drawable/music_logo"/>
+
+
+
+<TextView
+
+android:layout_width="match_parent"
+
+android:layout_height="wrap_content"
+
+android:layout_centerVertical="true"
+
+android:id="@+id/music_title_text"
+
+android:layout_toEndOf="@id/icon_view"
+
+android:paddingBottom="10dp"
+
+android:maxLines="1"
+
+android:ellipsize="end"
+
+tools:text="Music"
+
+android:textColor="@color/black"/>
+
+</RelativeLayout>
+
+
+
+
+
+
+
+MusicListAdapter.java
+package com.example.musicplayer;
+
+
+
+import android.content.Context;
+
+import android.content.Intent;
+
+import android.media.MediaPlayer;
+
+import android.view.LayoutInflater;
+
+import android.view.View;
+
+import android.view.ViewGroup;
+
+import android.widget.ImageView;
+
+import android.widget.TextView;
+
+
+
+import androidx.annotation.NonNull;
+
+import androidx.recyclerview.widget.RecyclerView;
+
+
+
+import java.util.ArrayList;
+
+import java.util.List;
+
+
+
+public class MusicListAdapterextends RecyclerView.Adapter<MusicListAdapter.viewHolder>{
+
+
+
+ArrayList<AudioModel>songList;
+
+Context context;
+
+
+
+public MusicListAdapter(ArrayList<AudioModel>songList, Context context) {
+
+this.songList= songList;
+
+this.context= context;
+
+}
+
+
+
+@Override
+
+public viewHolderonCreateViewHolder(ViewGroup parent, int viewType) {
+
+View view = LayoutInflater.from(context).inflate(R.layout.recycler_item,parent,false);
+
+return new MusicListAdapter.viewHolder(view);
+
+}
+
+
+
+@Override
+
+public void onBindViewHolder(MusicListAdapter.viewHolderholder,intposition) {
+
+AudioModelsongData = songList.get(position);
+
+holder.titleTextView.setText(songData.getTitle());
+
+holder.itemView.setOnClickListener(new View.OnClickListener() {
+
+@Override
+
+public void onClick(View v) {
+
+//navigate to another activity
+
+MyMediaPlayer.getInstance().reset();
+
+MyMediaPlayer.currentIndex= position;
+
+Intent intent = new Intent(context, MusicPlayerActivity.class);
+
+intent.putExtra("List",songList);
+
+intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+context.startActivity(intent);
+
+
+
+}
+
+});
+
+
+
+}
+
+
+
+@Override
+
+public int getItemCount() {
+
+return songList.size();
+
+}
+
+
+
+public class viewHolderextends RecyclerView.ViewHolder{
+
+
+
+TextViewtitleTextView;
+
+ImageViewiconImageView;
+
+
+
+public viewHolder(View itemView) {
+
+super(itemView);
+
+titleTextView= itemView.findViewById(R.id.music_title_text);
+
+iconImageView= itemView.findViewById(R.id.icon_view);
+
+}
+
+}
+
+}
+
+MyMediaPlayer.java
+package com.example.musicplayer;
+
+
+
+import android.media.MediaPlayer;
+
+
+
+public class MyMediaPlayer {
+
+static MediaPlayerinstance;
+
+public static MediaPlayergetInstance(){
+
+if(instance == null){
+
+instance= new MediaPlayer();
+
+}
+
+return instance;
+
+}
+
+public static int currentIndex= -1;
+
+}
+
+
+
+
+MusicPlayerActivity.java
+package com.example.musicplayer;
+
+
+
+import androidx.appcompat.app.AppCompatActivity;
+
+
+
+import android.annotation.SuppressLint;
+
+import android.os.Bundle;
+
+import android.widget.ImageView;
+
+import android.widget.SeekBar;
+
+import android.widget.TextView;
+
+
+
+import java.util.ArrayList;
+
+
+
+public class MusicPlayerActivityextends AppCompatActivity {
+
+TextViewTitleTV,CurrentTimeTV,TotalTimeTV;
+
+SeekBarseekBar;
+
+ImageViewpausePlay,nextBtn,previousBtn,musicIcon;
+
+ArrayList<AudioModel>SongList;
+
+
+
+@SuppressLint("MissingInflatedId")
+
+@Override
+
+protected void onCreate(Bundle savedInstanceState) {
+
+super.onCreate(savedInstanceState);
+
+setContentView(R.layout.activity_music_player2);
+
+
+
+TitleTV= findViewById(R.id.song_title);
+
+CurrentTimeTV= findViewById(R.id.current_time);
+
+TotalTimeTV= findViewById( R.id.total_time);
+
+seekBar= findViewById(R.id.seek_bar);
+
+pausePlay= findViewById(R.id.pause_play);
+
+nextBtn= findViewById(R.id.next);
+
+previousBtn= findViewById(R.id.previous);
+
+musicIcon= findViewById(R.id.music_icon);
+
+
+
+
+
+}
+
+}
+
